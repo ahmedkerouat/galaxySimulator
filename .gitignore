@@ -1,3 +1,4 @@
 source/out/
 source/.vs
 source/CMakePresets.json
+*.dll
