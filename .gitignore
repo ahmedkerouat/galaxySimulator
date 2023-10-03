@@ -1,4 +1,5 @@
 source/out/
 source/.vs
+source/include/glm
 source/CMakePresets.json
 *.dll
