@@ -1,0 +1,7 @@
+#ifndef SHADER_CONFIG_H
+#define SHADER_CONFIG_H
+
+#define VERTEX_SHADER_PATH "@SHADER_DEST_DIR@/vertex_shader.glsl"
+#define FRAGMENT_SHADER_PATH "@SHADER_DEST_DIR@/fragment_shader.glsl"
+
+#endif

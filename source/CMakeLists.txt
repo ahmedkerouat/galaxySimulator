@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.8)
 project ("galaxySimulator")
 
 # Add source to this project's executable.
-add_executable (galaxySimulator "main.cpp" "include/sphere.h" )
+add_executable (galaxySimulator "main.cpp" "include/sphere.h"  "include/shader.h" "shader.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET galaxySimulator PROPERTY CXX_STANDARD 20)
@@ -18,3 +18,22 @@ target_link_libraries(galaxySimulator ${CMAKE_SOURCE_DIR}/lib/glad.lib)
 target_link_libraries(galaxySimulator ${CMAKE_SOURCE_DIR}/lib/glfw3dll.lib)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Set the source directory for shader files
+set(SHADER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/shaders)
+
+# Set the destination directory in the build directory
+set(SHADER_DEST_DIR ${CMAKE_BINARY_DIR}/shaders)
+
+# Create a custom command to copy shader files to the build directory
+add_custom_command(
+    TARGET galaxySimulator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${SHADER_SOURCE_DIR}
+    ${SHADER_DEST_DIR}
+)
+
+# Tell CMake where to find the shaders at runtime
+configure_file(${SHADER_SOURCE_DIR}/shader_config.h.in ${CMAKE_BINARY_DIR}/shader_config.h)
+include_directories(${CMAKE_BINARY_DIR})
+
