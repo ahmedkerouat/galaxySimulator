@@ -46,7 +46,7 @@ int main() {
     std::string fragmentShaderSource = loadShaderSource("shaders/fragmentShader.glsl");
     GLuint shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
-    const int numberOfSpheres = 1000;
+    const int numberOfSpheres =  1000;
 
     std::vector<glm::vec3> spherePositions;
 
@@ -121,7 +121,7 @@ int main() {
         // Set the values for lighting
         glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
         glUniform3f(objectColorLoc, 0.8f, 0.0f, 0.8f);
-        glUniform1f(ambientStrengthLoc, 0.2f);
+        glUniform1f(ambientStrengthLoc, 0.8f);
 
         // Draw each sphere at its respective position
         for (const glm::vec3& position : spherePositions) {

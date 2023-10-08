@@ -8,7 +8,7 @@ uniform vec3 objectColor;
 uniform float ambientStrength;
 
 uniform sampler2D screenTexture;
-const float bloomThreshold = 0.1;
+const float bloomThreshold = 0.5;
 const float bloomIntensity = 3.0;
 
 void main() {
