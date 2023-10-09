@@ -13,6 +13,39 @@
 float randomFloat(float min, float max) {
     return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
 }
+const float epsilon = 0.001f;
+
+void calculateGravityForces(int numberOfSpheres, std::vector<glm::vec3> &spherePositions, std::vector<glm::vec3> &sphereVelocities) {
+    for (int i = 0; i < numberOfSpheres; i++) {
+        glm::vec3 acceleration(0.0f, 0.0f, 0.0f);
+        glm::vec3 currentPosition = spherePositions[i];
+
+        for (int j = 0; j < numberOfSpheres; j++) {
+            if (i != j) {
+                glm::vec3 otherPosition = spherePositions[j];
+                glm::vec3 direction = otherPosition - currentPosition;
+                float distance = glm::length(direction);
+
+                // Calculate gravitational force using simple formula
+                float forceMagnitude = 1 / (distance * distance + epsilon);
+                glm::vec3 force = forceMagnitude * direction;
+
+                // Accumulate forces
+                acceleration += force;
+            }
+        }
+
+        // Update velocity and position
+        float deltaTime = 0.001f;
+        glm::vec3 velocity = sphereVelocities[i];
+        velocity += acceleration * deltaTime;
+        currentPosition += velocity * deltaTime;
+
+        // Update the position and velocity of the sphere
+        spherePositions[i] = currentPosition;
+        sphereVelocities[i] = velocity;
+    }
+}
 
 int main() {
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -49,6 +82,7 @@ int main() {
     const int numberOfSpheres =  1000;
 
     std::vector<glm::vec3> spherePositions;
+    std::vector<glm::vec3> sphereVelocities;
 
     // Generate random positions for the spheres
     for (int i = 0; i < numberOfSpheres; i++) {
@@ -56,6 +90,7 @@ int main() {
         float y = randomFloat(-2.0f, 2.0f);
         float z = randomFloat(-2.0f, 2.0f);
         spherePositions.push_back(glm::vec3(x, y, z));
+        sphereVelocities.push_back(glm::vec3(0.0f));
     }
 
     // Create a sphere
@@ -122,6 +157,8 @@ int main() {
         glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
         glUniform3f(objectColorLoc, 0.8f, 0.0f, 0.8f);
         glUniform1f(ambientStrengthLoc, 0.8f);
+
+        calculateGravityForces(numberOfSpheres, spherePositions, sphereVelocities);
 
         // Draw each sphere at its respective position
         for (const glm::vec3& position : spherePositions) {
