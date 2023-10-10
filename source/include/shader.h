@@ -6,6 +6,7 @@
 
 GLuint compileShader(GLenum shaderType, const std::string& source);
 GLuint createShaderProgram(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+GLuint createComputeShaderProgram(const std::string& computeShaderSource);
 std::string loadShaderSource(const std::string& filePath);
 
 #endif

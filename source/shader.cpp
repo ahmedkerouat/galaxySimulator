@@ -59,3 +59,25 @@ GLuint createShaderProgram(const std::string& vertexShaderSource, const std::str
 
     return shaderProgram;
 }
+
+GLuint createComputeShaderProgram(const std::string& computeShaderSource) {
+    GLuint computeShader = compileShader(GL_COMPUTE_SHADER, computeShaderSource);
+
+    GLuint computeProgram = glCreateProgram();
+    glAttachShader(computeProgram, computeShader);
+    glLinkProgram(computeProgram);
+
+    GLint success;
+    glGetProgramiv(computeProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        GLchar infoLog[512];
+        glGetProgramInfoLog(computeProgram, sizeof(infoLog), nullptr, infoLog);
+        std::cerr << "Compute shader program linking error:\n" << infoLog << std::endl;
+        glDeleteProgram(computeProgram);
+        return 0;
+    }
+
+    glDeleteShader(computeShader);
+
+    return computeProgram;
+}
