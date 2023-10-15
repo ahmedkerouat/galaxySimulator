@@ -13,39 +13,6 @@
 float randomFloat(float min, float max) {
     return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
 }
-const float epsilon = 0.001f;
-
-void calculateGravityForces(int numberOfSpheres, std::vector<glm::vec3> &spherePositions, std::vector<glm::vec3> &sphereVelocities) {
-    for (int i = 0; i < numberOfSpheres; i++) {
-        glm::vec3 acceleration(0.0f, 0.0f, 0.0f);
-        glm::vec3 currentPosition = spherePositions[i];
-
-        for (int j = 0; j < numberOfSpheres; j++) {
-            if (i != j) {
-                glm::vec3 otherPosition = spherePositions[j];
-                glm::vec3 direction = otherPosition - currentPosition;
-                float distance = glm::length(direction);
-
-                // Calculate gravitational force using simple formula
-                float forceMagnitude = 1 / (distance * distance + epsilon);
-                glm::vec3 force = forceMagnitude * direction;
-
-                // Accumulate forces
-                acceleration += force;
-            }
-        }
-
-        // Update velocity and position
-        float deltaTime = 0.001f;
-        glm::vec3 velocity = sphereVelocities[i];
-        velocity += acceleration * deltaTime;
-        currentPosition += velocity * deltaTime;
-
-        // Update the position and velocity of the sphere
-        spherePositions[i] = currentPosition;
-        sphereVelocities[i] = velocity;
-    }
-}
 
 int main() {
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -56,8 +23,13 @@ int main() {
     }
 
     // Configure GLFW
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
     // Create a GLFW window
     GLFWwindow* window = glfwCreateWindow(800, 600, "galaxySimulator", nullptr, nullptr);
@@ -79,16 +51,21 @@ int main() {
     std::string fragmentShaderSource = loadShaderSource("shaders/fragmentShader.glsl");
     GLuint shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
-    const int numberOfSpheres =  1000;
+    std::string computeShaderSource = loadShaderSource("shaders/computeShader.glsl");
+    GLuint computeProgram = createComputeShaderProgram(computeShaderSource);
+
+    const int numberOfSpheres = 10000;
 
     std::vector<glm::vec3> spherePositions;
     std::vector<glm::vec3> sphereVelocities;
 
     // Generate random positions for the spheres
     for (int i = 0; i < numberOfSpheres; i++) {
+
         float x = randomFloat(-2.0f, 2.0f);
         float y = randomFloat(-2.0f, 2.0f);
         float z = randomFloat(-2.0f, 2.0f);
+
         spherePositions.push_back(glm::vec3(x, y, z));
         sphereVelocities.push_back(glm::vec3(0.0f));
     }
@@ -129,11 +106,47 @@ int main() {
     // Set key callback function
     glfwSetKeyCallback(window, key_callback);
 
+    GLuint positionBuffer, velocityBuffer;
+    glGenBuffers(1, &positionBuffer);
+    glGenBuffers(1, &velocityBuffer);
+
+    // Initialize buffer data
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, positionBuffer);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec3) * spherePositions.size(), spherePositions.data(), GL_DYNAMIC_COPY);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, velocityBuffer);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec3) * sphereVelocities.size(), sphereVelocities.data(), GL_DYNAMIC_COPY);
+
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Use the compute program and bind SSBOs
+        glUseProgram(computeProgram);
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, positionBuffer);
+        // Dispatch the compute shader
+        glDispatchCompute(numberOfSpheres, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        // Unbind SSBOs
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+
+        // Read back data from the SSBO
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, positionBuffer);
+        void* positionData = glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, sizeof(glm::vec3) * numberOfSpheres, GL_MAP_READ_BIT);
+        // Use the data to update spherePositions and sphereVelocities
+        for (int i = 0; i < numberOfSpheres; i++) {
+            glm::vec3* position = (glm::vec3*)((char*)positionData + i * sizeof(glm::vec3));
+            spherePositions[i] = *position;
+ 
+        }
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+        // Switch to the rendering shader program
         glUseProgram(shaderProgram);
 
         // Set transformation matrices (view and projection)
@@ -157,8 +170,6 @@ int main() {
         glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
         glUniform3f(objectColorLoc, 0.8f, 0.0f, 0.8f);
         glUniform1f(ambientStrengthLoc, 0.8f);
-
-        calculateGravityForces(numberOfSpheres, spherePositions, sphereVelocities);
 
         // Draw each sphere at its respective position
         for (const glm::vec3& position : spherePositions) {
