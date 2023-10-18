@@ -1,17 +1,17 @@
-#version 330 core
-layout(location=0) in vec3 position;
-layout(location=1) in vec3 normal;
-layout(location=2) in vec2 texCoord;
+#version 430 core
+
+layout(location = 0) in vec3 inPosition;
+out vec2 TexCoords;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 fragNormal;
-out vec2 fragTexCoord;
-
 void main() {
-    gl_Position = projection * view * model * vec4(position, 1.0);
-    fragNormal = mat3(transpose(inverse(model))) * normal;
-    fragTexCoord = texCoord;
+    // Calculate the final position of the quad
+    vec4 worldPosition = model * vec4(inPosition, 1.0);
+    gl_Position = projection * view * worldPosition;
+    
+    // Calculate texture coordinates for mapping the sphere texture
+    TexCoords = inPosition.xy * 0.5 + 0.5;
 }
