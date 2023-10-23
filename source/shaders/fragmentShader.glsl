@@ -1,23 +1,31 @@
 #version 330 core
-in vec3 fragNormal;
-in vec2 fragTexCoord;
-out vec4 fragColor;
 
-uniform vec3 lightColor;
-uniform vec3 objectColor;
-uniform float ambientStrength;
+uniform vec3 spherePosition;
+uniform vec3 cameraPosition;
+uniform float concentrationFactor;
 
-uniform sampler2D screenTexture;
-const float bloomThreshold = 0.5;
-const float bloomIntensity = 3.0;
+out vec4 FragColor;
 
-void main() {
-    vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
-    float diff = max(dot(fragNormal, lightDir), 0.0);
-    vec3 ambient = ambientStrength * lightColor;
-    vec3 result = (diff * lightColor + ambient) * objectColor;
-    vec4 screenColor = texture(screenTexture, fragTexCoord);
+void main()
+{
+    // Calculate the distance from the camera to the sphere
+    float distance = length(cameraPosition - spherePosition);
 
-    result += bloomIntensity * screenColor.rgb;
-    fragColor = vec4(result, 1.0);
+    // Define a threshold for the concentration effect
+    float threshold = 1.0;
+
+    // Calculate the concentration factor based on distance
+    float concentration = 1.0 - min(distance / threshold, 1.0);
+
+    // Define the brightest and darkest colors (RGB values)
+    vec3 brightestColor = vec3(1.0, 0.2, 1.0); // bright
+    vec3 darkestColor = vec3(0.6, 0.0, 0.6);   // dark
+
+    // Calculate the transition factor
+    float transitionFactor = concentration * 0.7;
+
+    // Calculate the final color using a linear interpolation
+    vec3 finalColor = mix(darkestColor, brightestColor, transitionFactor);
+
+    FragColor = vec4(finalColor, 1.0);
 }
