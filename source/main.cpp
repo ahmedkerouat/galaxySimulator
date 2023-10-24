@@ -59,16 +59,18 @@ int main() {
     std::vector<glm::vec3> spherePositions;
     std::vector<glm::vec3> sphereVelocities;
 
-    // Generate random positions for the spheres
     for (int i = 0; i < numberOfSpheres; i++) {
+        float radius = static_cast<float>(i) / numberOfSpheres * 10.0f;
+        float angle = static_cast<float>(i) * 1.0f;
 
-        float x = randomFloat(-2.0f, 2.0f);
-        float y = randomFloat(-2.0f, 2.0f);
-        float z = randomFloat(-2.0f, 2.0f);
+        float x = radius * cos(angle);
+        float y = radius * sin(angle);
+        float z = randomFloat(-0.2f, 0.2f);
 
         spherePositions.push_back(glm::vec3(x, y, z));
         sphereVelocities.push_back(glm::vec3(0.0f));
     }
+
 
     // Create a sphere
     Sphere star(0.005f, 50, 50);
@@ -142,7 +144,7 @@ int main() {
         for (int i = 0; i < numberOfSpheres; i++) {
             glm::vec3* position = (glm::vec3*)((char*)positionData + i * sizeof(glm::vec3));
             spherePositions[i] = *position;
- 
+
         }
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
@@ -177,6 +179,10 @@ int main() {
 
             GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+            // Pass the sphere's position to the fragment shader
+            GLuint positionLoc = glGetUniformLocation(shaderProgram, "spherePosition");
+            glUniform3fv(positionLoc, 1, glm::value_ptr(position));
 
             // Draw the sphere
             glBindVertexArray(VAO);
