@@ -1,8 +1,7 @@
 #version 430
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 128) in;
 
-// Define the buffer blocks for sphere positions and velocities
 layout(std430, binding = 0) buffer SpherePositions {
     vec3 spherePositions[];
 };
@@ -11,10 +10,10 @@ layout(std430, binding = 1) buffer SphereVelocities {
     vec3 sphereVelocities[];
 };
 
-const float epsilon = 0.001;
+const float epsilon = 0.01;
 const float darkMatterMass = 10.0; // Mass of dark matter
 const float darkEnergyAcceleration = 0.0001; // Acceleration due to dark energy
-const float deltaTime = 0.001;
+const float deltaTime = 0.0001;
 
 const vec3 supermassiveBlackHolePosition = vec3(0.0, 0.0, 0.0);
 const float supermassiveBlackHoleMass = 1000.0; // Mass of the supermassive black hole
@@ -23,31 +22,28 @@ void main() {
     uint sphereIndex = gl_GlobalInvocationID.x;
     uint sphereCount = spherePositions.length();
 
+    if (sphereIndex >= sphereCount) {
+        return;
+    }
+
     vec3 currentPosition = spherePositions[sphereIndex];
     vec3 acceleration = vec3(0.0);
 
-    // Calculate the force due to the supermassive black hole
+    // Precompute constants
     vec3 blackHoleDirection = supermassiveBlackHolePosition - currentPosition;
-    float blackHoleDistance = length(blackHoleDirection);
-    float forceMagnitudeBlackHole = supermassiveBlackHoleMass / (blackHoleDistance * blackHoleDistance + epsilon);
+    float blackHoleDistanceSq = dot(blackHoleDirection, blackHoleDirection);
+    float forceMagnitudeBlackHole = supermassiveBlackHoleMass / (blackHoleDistanceSq + epsilon);
     vec3 forceBlackHole = forceMagnitudeBlackHole * blackHoleDirection;
 
+    // Calculate gravitational force due to dark matter and dark energy
     for (uint j = 0; j < sphereCount; j++) {
         if (j != sphereIndex) {
-            vec3 otherPosition = spherePositions[j];
-            vec3 direction = otherPosition - currentPosition;
-            float distance = length(direction);
-
-            // Calculate gravitational force due to dark matter
-            float forceMagnitudeDarkMatter = darkMatterMass / (distance * distance + epsilon);
-            vec3 forceDarkMatter = forceMagnitudeDarkMatter * direction;
-
-            // Accumulate forces
-            acceleration += forceDarkMatter;
+            vec3 direction = spherePositions[j] - currentPosition;
+            float distanceSq = dot(direction, direction);
+            float forceMagnitudeDarkMatter = darkMatterMass / (distanceSq + epsilon);
+            acceleration += forceMagnitudeDarkMatter * direction;
         }
     }
-
-    // Add the effect of dark energy
     acceleration += darkEnergyAcceleration;
 
     // Update velocity and position
