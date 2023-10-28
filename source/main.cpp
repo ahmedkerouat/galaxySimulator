@@ -54,13 +54,18 @@ int main() {
     std::string computeShaderSource = loadShaderSource("shaders/computeShader.glsl");
     GLuint computeProgram = createComputeShaderProgram(computeShaderSource);
 
-    const int numberOfSpheres = 10000;
+    int numberOfSpheres = 10000;
+    float epsilon = 0.01;
+    float darkMatterMass = 10.0; // Mass of dark matter
+    float darkEnergyAcceleration = 0.0001; // Acceleration due to dark energy
+    float deltaTime = 0.0001;
+    float supermassiveBlackHoleMass = 1000.0;
 
     std::vector<glm::vec3> spherePositions;
     std::vector<glm::vec3> sphereVelocities;
 
     for (int i = 0; i < numberOfSpheres; i++) {
-        float radius = static_cast<float>(i) / numberOfSpheres * 10.0f;
+        float radius = static_cast<float>(i) / numberOfSpheres * 1.20f;
         float angle = static_cast<float>(i) * 1.0f;
 
         float x = radius * cos(angle);
@@ -127,6 +132,10 @@ int main() {
 
         // Use the compute program and bind SSBOs
         glUseProgram(computeProgram);
+        glUniform1f(glGetUniformLocation(computeProgram, "epsilon"), epsilon);
+        glUniform1f(glGetUniformLocation(computeProgram, "darkMatterMass"), darkMatterMass);
+        glUniform1f(glGetUniformLocation(computeProgram, "darkEnergyAcceleration"), darkEnergyAcceleration);
+        glUniform1f(glGetUniformLocation(computeProgram, "deltaTime"), deltaTime);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, positionBuffer);

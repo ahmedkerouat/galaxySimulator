@@ -10,13 +10,13 @@ layout(std430, binding = 1) buffer SphereVelocities {
     vec3 sphereVelocities[];
 };
 
-const float epsilon = 0.01;
-const float darkMatterMass = 10.0; // Mass of dark matter
-const float darkEnergyAcceleration = 0.0001; // Acceleration due to dark energy
-const float deltaTime = 0.0001;
+uniform float epsilon;
+uniform float darkMatterMass;
+uniform float darkEnergyAcceleration;
+uniform float deltaTime;
+uniform float supermassiveBlackHoleMass;
 
 const vec3 supermassiveBlackHolePosition = vec3(0.0, 0.0, 0.0);
-const float supermassiveBlackHoleMass = 1000.0; // Mass of the supermassive black hole
 
 void main() {
     uint sphereIndex = gl_GlobalInvocationID.x;
