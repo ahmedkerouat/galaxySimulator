@@ -9,6 +9,9 @@
 #include <ctime>
 #include "shader_config.h"
 #include <camera.h>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
 
 float randomFloat(float min, float max) {
     return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
@@ -54,12 +57,14 @@ int main() {
     std::string computeShaderSource = loadShaderSource("shaders/computeShader.glsl");
     GLuint computeProgram = createComputeShaderProgram(computeShaderSource);
 
+    // Variables to control
     int numberOfSpheres = 10000;
     float epsilon = 0.01;
     float darkMatterMass = 10.0; // Mass of dark matter
     float darkEnergyAcceleration = 0.0001; // Acceleration due to dark energy
     float deltaTime = 0.0001;
     float supermassiveBlackHoleMass = 1000.0;
+    bool isPaused = false;
 
     std::vector<glm::vec3> spherePositions;
     std::vector<glm::vec3> sphereVelocities;
@@ -124,11 +129,28 @@ int main() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, velocityBuffer);
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec3) * sphereVelocities.size(), sphereVelocities.data(), GL_DYNAMIC_COPY);
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::Begin("galaxySimulator");
+        ImGui::Text("Welcome to the galaxySimulator!");
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Use the compute program and bind SSBOs
         glUseProgram(computeProgram);
@@ -182,6 +204,7 @@ int main() {
         glUniform3f(objectColorLoc, 0.8f, 0.0f, 0.8f);
         glUniform1f(ambientStrengthLoc, 0.8f);
 
+
         // Draw each sphere at its respective position
         for (const glm::vec3& position : spherePositions) {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
@@ -207,6 +230,9 @@ int main() {
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
