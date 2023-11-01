@@ -15,7 +15,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     zoom -= yoffset * zoomSensitivity;
 
     // zoom limit
-    zoom = glm::clamp(zoom, 0.1f, 2.0f);
+    zoom = glm::clamp(zoom, 0.1f, 20.0f);
 }
 
 // handle camera rotation and position change
@@ -91,7 +91,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
         // Reset the view to normal
-        yaw = -90.0f;
+        yaw = -9.0f;
         pitch = 0.0f;
         zoom = 1.0f;
         cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
