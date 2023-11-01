@@ -35,7 +35,7 @@ int main() {
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
     // Create a GLFW window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "galaxySimulator", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1200, 800, "galaxySimulator", nullptr, nullptr);
     if (!window) {
         std::cerr << "GLFW window creation failed" << std::endl;
         glfwTerminate();
@@ -65,13 +65,14 @@ int main() {
     float darkEnergyAcceleration = 0.0001f; // Acceleration due to dark energy
     float deltaTime = 0.0001f;
     float supermassiveBlackHoleMass = 100.0f;
+    float radiusChoice = 1.2f;
     bool isPaused = false;
 
     std::vector<glm::vec3> spherePositions;
     std::vector<glm::vec3> sphereVelocities;
 
     for (int i = 0; i < numberOfSpheres; i++) {
-        float radius = static_cast<float>(i) / numberOfSpheres * 1.20f;
+        float radius = static_cast<float>(i) / numberOfSpheres * radiusChoice;
         float angle = static_cast<float>(i) * 1.0f;
 
         float x = radius * cos(angle);
@@ -149,10 +150,11 @@ int main() {
         ImGui::Begin("Simulation Controls");
 
         ImGui::SliderInt("Number of Spheres", &numberOfSpheres2, 1, 100000);
+        ImGui::SliderFloat("Radius", &radiusChoice, 0.01, 20, "%.5f");
         ImGui::SliderFloat("Epsilon", &epsilon, 0.00001, 1.0, "%.5f");
-        ImGui::SliderFloat("Dark Matter Mass", &darkMatterMass, 1.0, 100.0);
-        ImGui::SliderFloat("Dark Energy Acceleration", &darkEnergyAcceleration, 0.0001, 0.1, "%.5f");
         ImGui::SliderFloat("Delta Time", &deltaTime, 0.0001, 0.1, "%.5f");
+        ImGui::SliderFloat("Dark Matter Mass", &darkMatterMass, 1.0, 100.0);
+        ImGui::SliderFloat("Dark Energy Effect", &darkEnergyAcceleration, 0.0001, 0.1, "%.5f");
 
         if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
             isPaused = !isPaused;
@@ -165,7 +167,7 @@ int main() {
             numberOfSpheres = numberOfSpheres2;
 
             for (int i = 0; i < numberOfSpheres; i++) {
-                float radius = static_cast<float>(i) / numberOfSpheres * 1.20f;
+                float radius = static_cast<float>(i) / numberOfSpheres * radiusChoice;
                 float angle = static_cast<float>(i) * 1.0f;
 
                 float x = radius * cos(angle);
