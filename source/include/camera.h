@@ -4,7 +4,7 @@ bool rightMousePressed = false;
 bool leftMousePressed = false;
 bool spaceKeyPressed = false;
 glm::vec2 lastMousePos;
-float yaw = -90.0f;
+float yaw = -9.0f;
 float pitch = 0.0f;
 float fov = 45.0f;
 float cameraSpeed = 0.005f;
