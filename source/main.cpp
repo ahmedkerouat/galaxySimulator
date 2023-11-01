@@ -59,11 +59,12 @@ int main() {
 
     // Variables to control
     int numberOfSpheres = 10000;
-    float epsilon = 0.01;
-    float darkMatterMass = 10.0; // Mass of dark matter
-    float darkEnergyAcceleration = 0.0001; // Acceleration due to dark energy
-    float deltaTime = 0.0001;
-    float supermassiveBlackHoleMass = 1000.0;
+    int numberOfSpheres2 = numberOfSpheres;
+    float epsilon = 0.0001f;
+    float darkMatterMass = 10.0f; // Mass of dark matter
+    float darkEnergyAcceleration = 0.0001f; // Acceleration due to dark energy
+    float deltaTime = 0.0001f;
+    float supermassiveBlackHoleMass = 100.0f;
     bool isPaused = false;
 
     std::vector<glm::vec3> spherePositions;
@@ -145,12 +146,45 @@ int main() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::Begin("galaxySimulator");
-        ImGui::Text("Welcome to the galaxySimulator!");
-        ImGui::End();
+        ImGui::Begin("Simulation Controls");
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui::SliderInt("Number of Spheres", &numberOfSpheres2, 1, 100000);
+        ImGui::SliderFloat("Epsilon", &epsilon, 0.00001, 1.0, "%.5f");
+        ImGui::SliderFloat("Dark Matter Mass", &darkMatterMass, 1.0, 100.0);
+        ImGui::SliderFloat("Dark Energy Acceleration", &darkEnergyAcceleration, 0.0001, 0.1, "%.5f");
+        ImGui::SliderFloat("Delta Time", &deltaTime, 0.0001, 0.1, "%.5f");
+
+        if (ImGui::Button(isPaused ? "Resume" : "Pause")) {
+            isPaused = !isPaused;
+        }
+
+        if (ImGui::Button("Apply Changes")) {
+            spherePositions.clear();
+            sphereVelocities.clear();
+
+            numberOfSpheres = numberOfSpheres2;
+
+            for (int i = 0; i < numberOfSpheres; i++) {
+                float radius = static_cast<float>(i) / numberOfSpheres * 1.20f;
+                float angle = static_cast<float>(i) * 1.0f;
+
+                float x = radius * cos(angle);
+                float y = radius * sin(angle);
+                float z = randomFloat(-0.2f, 0.2f);
+
+                spherePositions.push_back(glm::vec3(x, y, z));
+                sphereVelocities.push_back(glm::vec3(0.0f));
+            }
+
+            // Reinitialize your SSBOs with the new data
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, positionBuffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec3) * spherePositions.size(), spherePositions.data(), GL_DYNAMIC_COPY);
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, velocityBuffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec3) * sphereVelocities.size(), sphereVelocities.data(), GL_DYNAMIC_COPY);
+        }
+
+        ImGui::End();;
 
         // Use the compute program and bind SSBOs
         glUseProgram(computeProgram);
@@ -172,6 +206,7 @@ int main() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, positionBuffer);
         void* positionData = glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, sizeof(glm::vec3) * numberOfSpheres, GL_MAP_READ_BIT);
         // Use the data to update spherePositions and sphereVelocities
+        if (!isPaused)
         for (int i = 0; i < numberOfSpheres; i++) {
             glm::vec3* position = (glm::vec3*)((char*)positionData + i * sizeof(glm::vec3));
             spherePositions[i] = *position;
@@ -220,6 +255,9 @@ int main() {
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
         }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
         glfwPollEvents();
