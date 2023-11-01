@@ -29,12 +29,6 @@ void main() {
     vec3 currentPosition = spherePositions[sphereIndex];
     vec3 acceleration = vec3(0.0);
 
-    // Precompute constants
-    vec3 blackHoleDirection = supermassiveBlackHolePosition - currentPosition;
-    float blackHoleDistanceSq = dot(blackHoleDirection, blackHoleDirection);
-    float forceMagnitudeBlackHole = supermassiveBlackHoleMass / (blackHoleDistanceSq + epsilon);
-    vec3 forceBlackHole = forceMagnitudeBlackHole * blackHoleDirection;
-
     // Calculate gravitational force due to dark matter and dark energy
     for (uint j = 0; j < sphereCount; j++) {
         if (j != sphereIndex) {
@@ -45,6 +39,15 @@ void main() {
         }
     }
     acceleration += darkEnergyAcceleration;
+
+    // Calculate gravitational force due to the black hole
+    vec3 blackHoleDirection = supermassiveBlackHolePosition - currentPosition;
+    float blackHoleDistanceSq = dot(blackHoleDirection , blackHoleDirection);   
+
+    float forceMagnitudeBlackHole = supermassiveBlackHoleMass / (blackHoleDistanceSq + epsilon);
+    vec3 forceBlackHole = (forceMagnitudeBlackHole * blackHoleDirection);
+
+    acceleration += forceBlackHole;
 
     // Update velocity and position
     vec3 velocity = sphereVelocities[sphereIndex];
