@@ -47,8 +47,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         if (pitch < -89.0f) pitch = -89.0f;
     }
     else if (leftMousePressed) {
-        float xoffset = static_cast<float>(xpos) - lastMousePos.x;
-        float yoffset = static_cast<float>(ypos) - lastMousePos.y;
+        float xoffset = lastMousePos.x - static_cast<float>(xpos);
+        float yoffset = lastMousePos.y - static_cast<float>(ypos);
 
         lastMousePos.x = static_cast<float>(xpos);
         lastMousePos.y = static_cast<float>(ypos);
