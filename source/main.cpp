@@ -12,6 +12,8 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 float randomFloat(float min, float max) {
     return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
@@ -43,11 +45,24 @@ int main() {
     }
     glfwMakeContextCurrent(window);
 
+    int logoWidth, logoHeight, logoChannels;
+    unsigned char* logoPixels = stbi_load("logo.png", &logoWidth, &logoHeight, &logoChannels, 4);
+
+
+    GLFWimage icons[1];
+    icons[0].width = logoWidth;
+    icons[0].height = logoHeight;
+    icons[0].pixels = logoPixels;
+
+    glfwSetWindowIcon(window, 1, icons);
+    stbi_image_free(logoPixels);
+
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "GLAD initialization failed" << std::endl;
         return -1;
     }
+
 
     // Vertex and fragment shader source code
     std::string vertexShaderSource = loadShaderSource("shaders/vertexShader.glsl");

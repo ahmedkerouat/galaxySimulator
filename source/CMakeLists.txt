@@ -9,7 +9,7 @@ project ("galaxySimulator")
 file(GLOB SOURCE_FILES "*.cpp")
 
 # Add source files to this project's executable.
-add_executable (galaxySimulator ${SOURCE_FILES} "include/sphere.h" "include/shader.h" "shader.cpp" "include/camera.h")
+add_executable (galaxySimulator ${SOURCE_FILES} "include/sphere.h" "include/shader.h" "shader.cpp" "include/camera.h" "include/stb_image.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET galaxySimulator PROPERTY CXX_STANDARD 20)
@@ -39,3 +39,6 @@ add_custom_command(
 # Tell CMake where to find the shaders at runtime
 configure_file(${SHADER_SOURCE_DIR}/shader_config.h.in ${CMAKE_BINARY_DIR}/shader_config.h)
 include_directories(${CMAKE_BINARY_DIR})
+
+# Copy the logo.png file to the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/resources/logo.png DESTINATION ${CMAKE_BINARY_DIR})
