@@ -57,13 +57,13 @@ This project is a n-body-type simulation of a galaxy. It utilizes a compute shad
 
 The project consists of multiple header files, each providing specific functionalities. Here's an overview of the key components:
 
-- **[sphere.h](source\include\sphere.h)**: This header file contains the Sphere class, which is used for rendering stars. It allows customization of the number of vertices and triangles that make up a sphere.
+- **[sphere.h](source/include/sphere.h)**: This header file contains the Sphere class, which is used for rendering stars. It allows customization of the number of vertices and triangles that make up a sphere.
 
-- **[shader.h](source\include\shader.h)**: The shader.h file provides functions for loading and compiling OpenGL shaders and creating shader programs. For instance, it includes a utility function, loadShaderSource, to load shader source code from external files.
+- **[shader.h](source/include/shader.h)**: The shader.h file provides functions for loading and compiling OpenGL shaders and creating shader programs. For instance, it includes a utility function, loadShaderSource, to load shader source code from external files.
 
-- **[shader_config.h](source\shaders\shader_config.h.in)**: This header includes the configuration data for fragment & vertex shaders.
+- **[shader_config.h](source/shaders/shader_config.h.in)**: This header includes the configuration data for fragment & vertex shaders.
 
-- **[camera.h](source\include\camera.h)**: The Camera class defined in this header is responsible for controlling the view and perspective within the simulation. It manages user input for camera movements.
+- **[camera.h](source/include/camera.h)**: The Camera class defined in this header is responsible for controlling the view and perspective within the simulation. It manages user input for camera movements.
 
 <a name="usage"></a>
 
