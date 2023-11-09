@@ -21,7 +21,7 @@
 
 ## About the project
 
-This project is a n-body-type simulation of a galaxy. It utilizes a compute shader for real-time calculations of gravitational interactions between randomly generated spheres acting as stars. The simulation, built using OpenGL and GLFW, provides an environment to observe the effects of gravity, dark matter, and dark energy on celestial bodies as they move and interact in a virtual space. For this project, I was inspired by Angel Luriot. 🌌
+This project is a n-body-type simulation of a galaxy. It utilizes a compute shader for real-time calculations of gravitational interactions between randomly generated spheres acting as stars. The simulation, built using OpenGL and GLFW, provides an environment to observe the effects of gravity, dark matter, and dark energy on celestial bodies as they move and interact in a virtual space. For this project, I was inspired by Angel Uriot. 🌌
 
 <a name="getstarted"></a>
 
